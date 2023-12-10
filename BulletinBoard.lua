@@ -1,4 +1,4 @@
-local DungeonNames = {
+DungeonNames = {
     ["RFC"] = "Ragefire Chasm",
     ["DM"] = "The Deadmines",
     ["WC"] = "Wailing Caverns",
@@ -135,7 +135,7 @@ BBBWindow.title:SetPoint("TOP", BBBWindow, 0, -10)
 BBBWindow.title:SetText("BBB (Better Bulletin Board)")
 
 -- (Mode) Create a frame for the dropdown menu
-local DropdownMenuMode = CreateFrame("Frame", "BBBDropdownMenu", BBBWindow, "UIDropDownMenuTemplate")
+local DropdownMenuMode = CreateFrame("Frame", "BBBDropdownMenuMode", BBBWindow, "UIDropDownMenuTemplate")
 DropdownMenuMode:SetPoint("TOPLEFT", BBBWindow, "TOPLEFT", -5, -30)
 DropdownMenuMode:SetSize(100, 30)
 
@@ -162,7 +162,7 @@ UIDropDownMenu_Initialize(DropdownMenuMode, InitializeModeDropdownMenu)
 UIDropDownMenu_SetText(DropdownMenuMode, "LFG")
 
 -- (Dungeon) Create a frame for the dropdown menu
-local DropdownMenuDungeon = CreateFrame("Frame", "BBBDropdownMenu", BBBWindow, "UIDropDownMenuTemplate")
+local DropdownMenuDungeon = CreateFrame("Frame", "BBBDropdownMenuDungeon", BBBWindow, "UIDropDownMenuTemplate")
 DropdownMenuDungeon:SetPoint("TOPLEFT", BBBWindow, "TOPLEFT", 140, -30)
 DropdownMenuDungeon:SetSize(150, 30)
 
