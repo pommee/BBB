@@ -1,0 +1,10 @@
+## Interface: 11404
+## Version: 0.0.1
+## Title: BBB
+## Notes: Board dedicated to easier LFG / LFM ...
+## Author: pommee
+
+Run.lua
+BulletinBoard.lua
+Chat.lua
+LoadAfter.lua
