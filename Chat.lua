@@ -23,7 +23,7 @@ function OnChatMessage(self, event, message, playerName)
 end
 
 function HandleLookingFor(message, playerName, mode)
-    local timestamp = date("%H:%M:%S")
+    local timestamp = "00:00"
     local tableEntry = {
         timestamp = timestamp,
         player = playerName,
@@ -32,6 +32,21 @@ function HandleLookingFor(message, playerName, mode)
     }
     table.insert(GroupTable, tableEntry)
     UpdateList(message, playerName, mode, timestamp)
+end
+
+function UpdateTimestamps()
+    for i = 1, #GroupTable do
+        if GroupTable[i].timestamp == "00:00" then
+            GroupTable[i].timestamp = 0
+        end
+
+        local currentTime = GroupTable[i].timestamp + 1
+        GroupTable[i].timestamp = currentTime
+        local minutes = math.floor(currentTime / 60)
+        local seconds = currentTime % 60
+        local formattedTime = string.format("%02d:%02d", minutes, seconds)
+        content.rows[i].columns[3]:SetText(formattedTime)
+    end
 end
 
 function UpdateList(message, playerName, mode, timestamp)
@@ -174,3 +189,17 @@ end
 
 messagesFrame:RegisterEvent("CHAT_MSG_CHANNEL")
 messagesFrame:SetScript("OnEvent", OnChatMessage)
+
+local updateInterval = 1
+local timerFrame = CreateFrame("Frame")
+local accumulatedTime = 0
+timerFrame:SetScript(
+    "OnUpdate",
+    function(self, elapsed)
+        accumulatedTime = accumulatedTime + elapsed
+        if accumulatedTime >= updateInterval then
+            UpdateTimestamps()
+            accumulatedTime = 0
+        end
+    end
+)
