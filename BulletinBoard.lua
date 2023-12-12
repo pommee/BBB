@@ -181,7 +181,7 @@ local function InitializeDungeonDropdownMenu(self, level)
 end
 
 UIDropDownMenu_Initialize(DropdownMenuDungeon, InitializeDungeonDropdownMenu)
-UIDropDownMenu_SetText(DropdownMenuDungeon, "Ragefire Chasm")
+UIDropDownMenu_SetText(DropdownMenuDungeon, "Blackfathom Deeps")
 
 -- Show window
 BBBWindow:Show()

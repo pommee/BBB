@@ -56,6 +56,18 @@ function UpdateList(message, playerName, mode, timestamp)
             button.columns[j] = button:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
             button.columns[j]:SetPoint("LEFT", (j - 1) * currentCellWidth, 0)
         end
+
+        button:RegisterForClicks("RightButtonUp")
+        button:SetScript(
+            "OnClick",
+            function(self, buttonClicked)
+                if buttonClicked == "RightButton" then
+                    ShowRightClickMenu(index)
+                else
+                    -- Handle other types of clicks if needed
+                end
+            end
+        )
         content.rows[index] = button
     end
 
@@ -74,6 +86,52 @@ function UpdateList(message, playerName, mode, timestamp)
     for i = #GroupTable + 1, #content.rows do
         content.rows[i]:Hide()
     end
+end
+
+function ShowRightClickMenu(index)
+    local menu = CreateFrame("Frame", "BBBRightClickMenu", UIParent, "UIDropDownMenuTemplate")
+    local playername = content.rows[index].columns[1]:GetText()
+
+    -- Define menu options
+    local menuList = {
+        {
+            text = "Who",
+            func = function()
+                DEFAULT_CHAT_FRAME.editBox:SetText("/who " .. playername)
+                ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)
+            end
+        },
+        {
+            text = "Whisper",
+            func = function()
+                ChatFrame_SendTell(playername)
+            end
+        },
+        {
+            text = "Invite",
+            func = function()
+                InviteUnit(playername)
+            end
+        },
+        {
+            text = "Ignore",
+            func = function()
+                C_FriendList.AddIgnore(playername)
+            end
+        }
+    }
+
+    local function InitializeRightClickMenu(self, level)
+        for _, option in ipairs(menuList) do
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = option.text
+            info.func = option.func
+            UIDropDownMenu_AddButton(info, level)
+        end
+    end
+
+    UIDropDownMenu_Initialize(menu, InitializeRightClickMenu, "MENU")
+    ToggleDropDownMenu(1, nil, menu, "cursor", 0, 0)
 end
 
 function ContainsAbbreviation(message, selectedDungeon)
@@ -98,13 +156,13 @@ end
 
 ------ INITIALIZING ------
 if BBBWindow then
-    -- adding a scrollframe (includes basic scrollbar thumb/buttons and functionality)
+    -- Add a scrollframe (includes basic scrollbar thumb/buttons and functionality)
     local ScrollFrame = CreateFrame("ScrollFrame", "BBBScrollFrame", BBBWindow, "UIPanelScrollFrameTemplate")
     ScrollFrame:SetSize(CELL_WIDTH * NUM_CELLS + 40, 300)
     ScrollFrame:SetPoint("TOPLEFT", BBBWindow, "TOPLEFT", 10, -60)
     ScrollFrame:SetPoint("BOTTOMRIGHT", BBBWindow, "BOTTOMRIGHT", -30, 10)
 
-    -- creating a scrollChild to contain the content
+    -- Create a scrollChild to contain the content
     ScrollFrame.scrollChild = CreateFrame("Frame", nil, ScrollFrame)
     ScrollFrame.scrollChild:SetSize(100, 100)
     ScrollFrame.scrollChild:SetPoint("TOPLEFT", 5, -5)
