@@ -4,11 +4,23 @@ local messagesFrame = CreateFrame("Frame")
 local CELL_WIDTH = 250
 local CELL_HEIGHT = 20
 local NUM_CELLS = 3
-local content
-
 local GroupTable = {}
+local CLASS_COLORS = {
+    Druid = {r = 1.00, g = 0.49, b = 0.04},
+    Hunter = {r = 0.67, g = 0.83, b = 0.45},
+    Mage = {r = 0.41, g = 0.80, b = 0.94},
+    Paladin = {r = 0.96, g = 0.55, b = 0.73},
+    Priest = {r = 1.00, g = 1.00, b = 1.00},
+    Rogue = {r = 1.00, g = 0.96, b = 0.41},
+    Shaman = {r = 0.0, g = 0.44, b = 0.87},
+    Warlock = {r = 0.58, g = 0.51, b = 0.79},
+    Warrior = {r = 0.78, g = 0.61, b = 0.43}
+}
 
-function OnChatMessage(self, event, message, playerName)
+Content = {}
+
+function OnChatMessage(self, event, message, playerName, _, _, _, _, _, _, _, _, _, guid, _, _, _, _, _)
+    local playerClass, _, playerRace = GetPlayerInfoByGUID(guid)
     local mode = UIDropDownMenu_GetText(_G["BBBDropdownMenuMode"])
     local dungeon = GetAbbreviationByFullName(UIDropDownMenu_GetText(_G["BBBDropdownMenuDungeon"]))
 
@@ -16,13 +28,13 @@ function OnChatMessage(self, event, message, playerName)
     if mode == "LFG" or mode == "LFM" then
         if string.find(message:upper(), mode) then
             if ContainsAbbreviation(message:upper(), dungeon) then
-                HandleLookingFor(message, playerName, mode)
+                HandleLookingFor(message, playerName, mode, playerClass, playerRace)
             end
         end
     end
 end
 
-function HandleLookingFor(message, playerName, mode)
+function HandleLookingFor(message, playerName, mode, playerClass, playerRace)
     local timestamp = "00:00"
     local tableEntry = {
         timestamp = timestamp,
@@ -31,7 +43,7 @@ function HandleLookingFor(message, playerName, mode)
         mode = mode
     }
     table.insert(GroupTable, tableEntry)
-    UpdateList(message, playerName, mode, timestamp)
+    UpdateList(message, playerName, mode, timestamp, playerClass, playerRace)
 end
 
 function UpdateTimestamps()
@@ -45,32 +57,26 @@ function UpdateTimestamps()
         local minutes = math.floor(currentTime / 60)
         local seconds = currentTime % 60
         local formattedTime = string.format("%02d:%02d", minutes, seconds)
-        content.rows[i].columns[3]:SetText(formattedTime)
+        Content.rows[i].columns[3]:SetText(formattedTime)
     end
 end
 
-function UpdateList(message, playerName, mode, timestamp)
+function UpdateList(message, playerName, mode, timestamp, playerClass, playerRace)
     local index = #GroupTable
-    if not content.rows[index] then
-        local button = CreateFrame("Button", nil, content)
+    if not Content.rows[index] then
+        local button = CreateFrame("Button", nil, Content)
         button:SetSize(CELL_WIDTH * NUM_CELLS, CELL_HEIGHT)
         button:SetPoint("TOPLEFT", 0, -(index - 1) * CELL_HEIGHT)
         button.columns = {}
-        for j = 1, 3 do
-            -- 1 = name, 2 = message, 3 = timestamp
-            local currentCellWidth
-            if j == 1 then
-                currentCellWidth = 50
-            end
-            if j == 2 then
-                currentCellWidth = 100
-            end
-            if j == 3 then
-                currentCellWidth = 250
-            end
-            button.columns[j] = button:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-            button.columns[j]:SetPoint("LEFT", (j - 1) * currentCellWidth, 0)
-        end
+
+        button.columns[1] = button:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+        button.columns[1]:SetPoint("LEFT", 0, 0)
+
+        button.columns[2] = button:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+        button.columns[2]:SetPoint("LEFT", 100, 0)
+
+        button.columns[3] = button:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+        button.columns[3]:SetPoint("LEFT", BBBWindow:GetWidth() - 100, 0)
 
         button:RegisterForClicks("RightButtonUp")
         button:SetScript(
@@ -78,34 +84,55 @@ function UpdateList(message, playerName, mode, timestamp)
             function(self, buttonClicked)
                 if buttonClicked == "RightButton" then
                     ShowRightClickMenu(index)
-                else
-                    -- Handle other types of clicks if needed
+                end
+                if buttonClicked == "LeftButton" then
+                    ShowRightClickMenu(index)
                 end
             end
         )
-        content.rows[index] = button
+        Content.rows[index] = button
     end
 
+    local shortenedMessage = message
     -- If a message is long then shorten it
     if #message > 60 then
-        message = message:sub(1, 57) .. "..."
+        shortenedMessage = message:sub(1, 57) .. "..."
     end
 
     -- now actually update the contents of the row
-    content.rows[index].columns[1]:SetText(playerName)
-    content.rows[index].columns[2]:SetText(message)
-    content.rows[index].columns[3]:SetText(timestamp)
+    Content.rows[index].columns[1]:SetText(playerName)
+    SetClassTextColor(playerClass, Content.rows[index].columns[1])
+    Content.rows[index].columns[2]:SetText(shortenedMessage)
+    Content.rows[index].columns[3]:SetText(timestamp)
 
-    content.rows[index]:Show()
+    Content.rows[index]:SetScript(
+        "OnEnter",
+        function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:SetText(playerName)
+            GameTooltip:AddLine(playerClass .. " " .. playerRace)
+            GameTooltip:AddLine(message, nil, nil, nil, true)
+            GameTooltip:Show()
+        end
+    )
+
+    Content.rows[index]:SetScript(
+        "OnLeave",
+        function(self)
+            GameTooltip:Hide()
+        end
+    )
+
+    Content.rows[index]:Show()
     -- hide all extra rows (if list shrunk, hiding leftover)
-    for i = #GroupTable + 1, #content.rows do
-        content.rows[i]:Hide()
+    for i = #GroupTable + 1, #Content.rows do
+        Content.rows[i]:Hide()
     end
 end
 
 function ShowRightClickMenu(index)
     local menu = CreateFrame("Frame", "BBBRightClickMenu", UIParent, "UIDropDownMenuTemplate")
-    local playername = content.rows[index].columns[1]:GetText()
+    local playername = Content.rows[index].columns[1]:GetText()
 
     -- Define menu options
     local menuList = {
@@ -169,6 +196,15 @@ function GetAbbreviationByFullName(fullName)
     return nil
 end
 
+function SetClassTextColor(className, fontString)
+    local color = CLASS_COLORS[className]
+    if color then
+        fontString:SetTextColor(color.r, color.g, color.b)
+    else
+        fontString:SetTextColor(1.0, 1.0, 1.0)
+    end
+end
+
 ------ INITIALIZING ------
 if BBBWindow then
     -- Add a scrollframe (includes basic scrollbar thumb/buttons and functionality)
@@ -183,8 +219,8 @@ if BBBWindow then
     ScrollFrame.scrollChild:SetPoint("TOPLEFT", 5, -5)
     ScrollFrame:SetScrollChild(ScrollFrame.scrollChild)
 
-    content = ScrollFrame.scrollChild
-    content.rows = {}
+    Content = ScrollFrame.scrollChild
+    Content.rows = {}
 end
 
 messagesFrame:RegisterEvent("CHAT_MSG_CHANNEL")

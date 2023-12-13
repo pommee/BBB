@@ -3,10 +3,11 @@ local BBBWindow = _G["BBBWindow"]
 -- Create a frame for the minimap button
 local MinimapButton = CreateFrame("Button", "BBBMinimapButton", Minimap)
 MinimapButton:SetSize(32, 32)
+MinimapButton:SetMovable(true)
 
 -- Set the button's appearance and texture
 MinimapButton:SetNormalTexture("Interface\\Icons\\INV_Misc_Map02")
-MinimapButton:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
+MinimapButton:SetHighlightTexture("Interface\\Minimap\\Artifacts-PerkRing-Final-Mask")
 
 -- Set the button's position on the minimap
 MinimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 0, 0)

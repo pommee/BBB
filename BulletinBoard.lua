@@ -98,13 +98,31 @@ DungeonNames = {
 }
 
 -- Window --
-local BBBWindow = CreateFrame("Frame", "BBBWindow", UIParent, "UIPanelDialogTemplate")
+BBBWindow = CreateFrame("Frame", "BBBWindow", UIParent, "BasicFrameTemplateWithInset")
 BBBWindow:SetPoint("CENTER")
 BBBWindow:SetSize(600, 500)
 BBBWindow:SetMovable(true)
 BBBWindow:EnableMouse(true)
+BBBWindow:SetResizable(true)
 BBBWindow:SetClampedToScreen(true)
-BBBWindow:SetFrameStrata("DIALOG")
+BBBWindow:SetFrameStrata("FULLSCREEN_DIALOG")
+
+BBBWindow:SetScript(
+    "OnMouseDown",
+    function(self, button)
+        if button == "LeftButton" then
+            self:StartSizing("BOTTOMRIGHT")
+            self:SetUserPlaced(true)
+        end
+    end
+)
+
+BBBWindow:SetScript(
+    "OnMouseUp",
+    function(self, button)
+        self:StopMovingOrSizing()
+    end
+)
 
 -- Titlebar --
 BBBWindow.titleBar = CreateFrame("Frame", nil, BBBWindow)
@@ -129,9 +147,22 @@ BBBWindow.titleBar:SetScript(
     end
 )
 
+BBBWindow:SetScript(
+    "OnSizeChanged",
+    function()
+        local Content = _G["Content"]
+        -- Update the widths of the columns for each existing row
+        for index = 1, #Content.rows do
+            Content.rows[index].columns[1]:SetPoint("LEFT", 0, 0)
+            Content.rows[index].columns[2]:SetPoint("LEFT", 100, 0)
+            Content.rows[index].columns[3]:SetPoint("LEFT", BBBWindow:GetWidth() - 100, 0)
+        end
+    end
+)
+
 -- Title
 BBBWindow.title = BBBWindow:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-BBBWindow.title:SetPoint("TOP", BBBWindow, 0, -10)
+BBBWindow.title:SetPoint("TOP", BBBWindow, 0, -5)
 BBBWindow.title:SetText("BBB (Better Bulletin Board)")
 
 -- (Mode) Create a frame for the dropdown menu
