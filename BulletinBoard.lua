@@ -1,106 +1,19 @@
-DungeonNames = {
+DUNGEON_NAMES = {
     ["RFC"] = "Ragefire Chasm",
-    ["DM"] = "The Deadmines",
     ["WC"] = "Wailing Caverns",
+    ["DM"] = "Deadmines",
     ["SFK"] = "Shadowfang Keep",
-    ["STK"] = "The Stockade",
     ["BFD"] = "Blackfathom Deeps",
-    ["GNO"] = "Gnomeregan",
+    ["Stocks"] = "Stockade",
+    ["Gnomer"] = "Gnomeregan",
     ["RFK"] = "Razorfen Kraul",
-    ["SM2"] = "Scarlet Monastery",
-    ["SMG"] = "Scarlet Monastery: Graveyard",
-    ["SML"] = "Scarlet Monastery: Library",
-    ["SMA"] = "Scarlet Monastery: Armory",
-    ["SMC"] = "Scarlet Monastery: Cathedral",
-    ["RFD"] = "Razorfen Downs",
-    ["ULD"] = "Uldaman",
-    ["ZF"] = "Zul'Farrak",
-    ["MAR"] = "Maraudon",
-    ["ST"] = "The Sunken Temple",
-    ["BRD"] = "Blackrock Depths",
-    ["DM2"] = "Dire Maul",
-    ["DME"] = "Dire Maul: East",
-    ["DMN"] = "Dire Maul: North",
-    ["DMW"] = "Dire Maul: West",
-    ["STR"] = "Stratholme",
-    ["SCH"] = "Scholomance",
-    ["LBRS"] = "Lower Blackrock Spire",
-    ["UBRS"] = "Upper Blackrock Spire (10)",
-    ["RAMPS"] = "Hellfire Citadel: Ramparts",
-    ["BF"] = "Hellfire Citadel: Blood Furnace",
-    ["SP"] = "Coilfang Reservoir: Slave Pens",
-    ["UB"] = "Coilfang Reservoir: Underbog",
-    ["MT"] = "Auchindoun: Mana Tombs",
-    ["CRYPTS"] = "Auchindoun: Auchenai Crypts",
-    ["SETH"] = "Auchindoun: Sethekk Halls",
-    ["OHB"] = "Caverns of Time: Old Hillsbrad",
-    ["MECH"] = "Tempest Keep: The Mechanar",
-    ["BM"] = "Caverns of Time: Black Morass",
-    ["MGT"] = "Magisters' Terrace",
-    ["SH"] = "Hellfire Citadel: Shattered Halls",
-    ["BOT"] = "Tempest Keep: Botanica",
-    ["SL"] = "Auchindoun: Shadow Labyrinth",
-    ["SV"] = "Coilfang Reservoir: Steamvault",
-    ["ARC"] = "Tempest Keep: The Arcatraz",
-    ["KARA"] = "Karazhan",
-    ["GL"] = "Gruul's Lair",
-    ["MAG"] = "Hellfire Citadel: Magtheridon's Lair",
-    ["SSC"] = "Coilfang Reservoir: Serpentshrine Cavern",
-    ["UK"] = "Utgarde Keep",
-    ["NEX"] = "The Nexus",
-    ["AZN"] = "Azjol-Nerub",
-    ["ANK"] = "Ahn’kahet: The Old Kingdom",
-    ["DTK"] = "Drak’Tharon Keep",
-    ["VH"] = "Violet Hold",
-    ["GD"] = "Gundrak",
-    ["HOS"] = "Halls of Stone",
-    ["HOL"] = "Halls of Lightning",
-    ["COS"] = "The Culling of Stratholme",
-    ["OCC"] = "The Oculus",
-    ["UP"] = "Utgarde Pinnacle",
-    ["FOS"] = "Forge of Souls",
-    ["POS"] = "Pit of Saron",
-    ["HOR"] = "Halls of Reflection",
-    ["CHAMP"] = "Trial of the Champion",
-    ["NAXX"] = "Naxxramas",
-    ["OS"] = "Obsidian Sanctum",
-    ["VOA"] = "Vault of Archavon",
-    ["EOE"] = "Eye of Eternity",
-    ["ULDAR"] = "Ulduar",
-    ["TOTC"] = "Trial of the Crusader",
-    ["RS"] = "Ruby Sanctum",
-    ["ICC"] = "Icecrown Citadel",
-    ["EYE"] = "Tempest Keep: The Eye",
-    ["ZA"] = "Zul-Aman",
-    ["HYJAL"] = "The Battle For Mount Hyjal",
-    ["BT"] = "Black Temple",
-    ["SWP"] = "Sunwell Plateau",
-    ["ONY"] = "Onyxia's Lair (40)",
-    ["MC"] = "Molten Core (40)",
-    ["ZG"] = "Zul'Gurub (20)",
-    ["AQ20"] = "Ruins of Ahn'Qiraj (20)",
-    ["BWL"] = "Blackwing Lair (40)",
-    ["AQ40"] = "Temple of Ahn'Qiraj (40)",
-    ["NAX"] = "Naxxramas (40)",
-    ["WSG"] = "Warsong Gulch (PvP)",
-    ["AB"] = "Arathi Basin (PvP)",
-    ["AV"] = "Alterac Valley (PvP)",
-    ["EOTS"] = "Eye of the Storm (PvP)",
-    ["SOTA"] = "Stand of the Ancients (PvP)",
-    ["WG"] = "Wintergrasp (PvP)",
-    ["ARENA"] = "Arena (PvP)",
-    ["MISC"] = "Miscellaneous",
-    ["TRADE"] = "Trade",
-    ["DEBUG"] = "DEBUG INFO",
-    ["BAD"] = "DEBUG BAD WORDS - REJECTED",
-    ["BREW"] = "Brewfest - Coren Direbrew",
-    ["HOLLOW"] = "Hallow's End - Headless Horseman"
+    ["RFD"] = "Razorfen Downs"
 }
 
 -- Window --
 BBBWindow = CreateFrame("Frame", "BBBWindow", UIParent, "BasicFrameTemplateWithInset")
 BBBWindow:SetPoint("CENTER")
-BBBWindow:SetSize(600, 500)
+BBBWindow:SetResizeBounds(540, 300, 600, 500)
 BBBWindow:SetMovable(true)
 BBBWindow:EnableMouse(true)
 BBBWindow:SetResizable(true)
@@ -155,7 +68,7 @@ BBBWindow:SetScript(
         for index = 1, #Content.rows do
             Content.rows[index].columns[1]:SetPoint("LEFT", 0, 0)
             Content.rows[index].columns[2]:SetPoint("LEFT", 100, 0)
-            Content.rows[index].columns[3]:SetPoint("LEFT", BBBWindow:GetWidth() - 100, 0)
+            Content.rows[index].columns[3]:SetPoint("LEFT", BBBWindow:GetWidth() - 80, 0)
         end
     end
 )
@@ -187,6 +100,13 @@ local function InitializeModeDropdownMenu(self, level)
         UIDropDownMenu_SetText(DropdownMenuMode, "LFM")
     end
     UIDropDownMenu_AddButton(info, level)
+
+    info.text = "MISC"
+    info.value = "MISC"
+    info.func = function()
+        UIDropDownMenu_SetText(DropdownMenuMode, "MISC")
+    end
+    UIDropDownMenu_AddButton(info, level)
 end
 
 UIDropDownMenu_Initialize(DropdownMenuMode, InitializeModeDropdownMenu)
@@ -201,7 +121,7 @@ DropdownMenuDungeon:SetSize(150, 30)
 local function InitializeDungeonDropdownMenu(self, level)
     local info = UIDropDownMenu_CreateInfo()
 
-    for abbreviation, fullName in pairs(DungeonNames) do
+    for abbreviation, fullName in pairs(DUNGEON_NAMES) do
         info.text = fullName
         info.value = abbreviation
         info.func = function()
@@ -214,5 +134,60 @@ end
 UIDropDownMenu_Initialize(DropdownMenuDungeon, InitializeDungeonDropdownMenu)
 UIDropDownMenu_SetText(DropdownMenuDungeon, "Blackfathom Deeps")
 
+soundCheckbox = CreateFrame("CheckButton", "BBBSoundCheckbox", BBBWindow, "UICheckButtonTemplate")
+soundCheckbox:SetPoint("TOPLEFT", BBBWindow, "TOPLEFT", 300, -30)
+
+local soundCheckboxTooltip = CreateFrame("GameTooltip", "BBBSoundCheckboxTooltip", nil, "GameTooltipTemplate")
+
+-- Set tooltip script for OnEnter and OnLeave events
+soundCheckbox:SetScript(
+    "OnEnter",
+    function()
+        soundCheckboxTooltip:ClearAllPoints()
+        soundCheckboxTooltip:SetOwner(soundCheckbox, "ANCHOR_RIGHT")
+        soundCheckboxTooltip:SetText("On message play sound")
+        soundCheckboxTooltip:Show()
+    end
+)
+soundCheckbox:SetScript(
+    "OnLeave",
+    function()
+        soundCheckboxTooltip:Hide()
+    end
+)
+
+EditBox = CreateFrame("EditBox", "MyEditBox", BBBWindow, "InputBoxTemplate")
+EditBox:SetSize(150, -30)
+EditBox:SetPoint("TOP", 150, -60)
+EditBox:SetAutoFocus(false)
+EditBox:SetFontObject(GameFontNormal)
+EditBox:SetText("Type here...")
+
+EditBox:SetScript(
+    "OnEnterPressed",
+    function(self)
+        self:ClearFocus()
+    end
+)
+
+EditBox:SetScript(
+    "OnEnter",
+    function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+        GameTooltip:SetText("Custom search term in mischelaneous mode")
+        GameTooltip:Show()
+    end
+)
+
+EditBox:SetScript(
+    "OnLeave",
+    function(self)
+        GameTooltip:Hide()
+    end
+)
+
 -- Show window
 BBBWindow:Show()
+
+-- Hide sound tooltip / visible on startup for some reason
+soundCheckboxTooltip:Hide()

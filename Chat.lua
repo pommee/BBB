@@ -1,5 +1,7 @@
 local BBBWindow = _G["BBBWindow"]
-local DungeonNames = _G["DungeonNames"]
+local DUNGEON_NAMES = _G["DUNGEON_NAMES"]
+local SoundCheckbox = _G["soundCheckbox"]
+local editBox = _G["EditBox"]
 local messagesFrame = CreateFrame("Frame")
 local CELL_WIDTH = 250
 local CELL_HEIGHT = 20
@@ -30,6 +32,13 @@ function OnChatMessage(self, event, message, playerName, _, _, _, _, _, _, _, _,
             if ContainsAbbreviation(message:upper(), dungeon) then
                 HandleLookingFor(message, playerName, mode, playerClass, playerRace)
             end
+        end
+    elseif mode == "MISC" then
+        local searchTerm = editBox:GetText()
+
+        -- @TODO: Implement so that MISC works
+        if message.find(message:lower(), searchTerm) then
+            print(message)
         end
     end
 end
@@ -76,7 +85,7 @@ function UpdateList(message, playerName, mode, timestamp, playerClass, playerRac
         button.columns[2]:SetPoint("LEFT", 100, 0)
 
         button.columns[3] = button:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-        button.columns[3]:SetPoint("LEFT", BBBWindow:GetWidth() - 100, 0)
+        button.columns[3]:SetPoint("LEFT", BBBWindow:GetWidth() - 80, 0)
 
         button:RegisterForClicks("RightButtonUp")
         button:SetScript(
@@ -104,6 +113,10 @@ function UpdateList(message, playerName, mode, timestamp, playerClass, playerRac
     SetClassTextColor(playerClass, Content.rows[index].columns[1])
     Content.rows[index].columns[2]:SetText(shortenedMessage)
     Content.rows[index].columns[3]:SetText(timestamp)
+
+    if SoundCheckbox:GetChecked() then
+        PlaySoundFile("Interface\\AddOns\\BBB\\Simon.ogg")
+    end
 
     Content.rows[index]:SetScript(
         "OnEnter",
@@ -177,7 +190,7 @@ function ShowRightClickMenu(index)
 end
 
 function ContainsAbbreviation(message, selectedDungeon)
-    for abbreviation, fullName in pairs(DungeonNames) do
+    for abbreviation, fullName in pairs(DUNGEON_NAMES) do
         if string.find(message:upper(), abbreviation) then
             if abbreviation == selectedDungeon:upper() then
                 return true, abbreviation, fullName
@@ -188,7 +201,7 @@ function ContainsAbbreviation(message, selectedDungeon)
 end
 
 function GetAbbreviationByFullName(fullName)
-    for abbreviation, name in pairs(DungeonNames) do
+    for abbreviation, name in pairs(DUNGEON_NAMES) do
         if name == fullName then
             return abbreviation
         end
