@@ -14,11 +14,8 @@ Better Bulletin Board (BBB) is a World of Warcraft (WoW) addon designed to enhan
 
 1. Download the addon folder.
 2. Extract the contents into the WoW `Interface/AddOns` directory.
-3. Restart WoW or send `/reload` command in the chat."
+3. Restart WoW or send `/reload` command in the chat.
 
-## @TODO
-
-* **When a timer reaches N time, remove entry from table.**   
-    This shall not make the entire list jump, FIFO, FILO?
+## Other
 
 Contributions, suggestions, and bug reports are welcome! Feel free to open an issue or pull request.
