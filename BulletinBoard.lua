@@ -10,14 +10,17 @@ DUNGEON_NAMES = {
     ["RFD"] = "Razorfen Downs"
 }
 
+SelectedModes = {}
+
 -- Window --
 BBBWindow = CreateFrame("Frame", "BBBWindow", UIParent, "BasicFrameTemplateWithInset")
 BBBWindow:SetPoint("CENTER")
+BBBWindow:SetSize(540, 300)
 BBBWindow:SetResizeBounds(540, 300, 600, 500)
 BBBWindow:SetMovable(true)
+BBBWindow:SetClampedToScreen(true)
 BBBWindow:EnableMouse(true)
 BBBWindow:SetResizable(true)
-BBBWindow:SetClampedToScreen(true)
 BBBWindow:SetFrameStrata("FULLSCREEN_DIALOG")
 
 BBBWindow:SetScript(
@@ -64,11 +67,13 @@ BBBWindow:SetScript(
     "OnSizeChanged",
     function()
         local Content = _G["Content"]
-        -- Update the widths of the columns for each existing row
-        for index = 1, #Content.rows do
-            Content.rows[index].columns[1]:SetPoint("LEFT", 0, 0)
-            Content.rows[index].columns[2]:SetPoint("LEFT", 100, 0)
-            Content.rows[index].columns[3]:SetPoint("LEFT", BBBWindow:GetWidth() - 80, 0)
+        if Content then
+            -- Update the widths of the columns for each existing row
+            for index = 1, #Content.rows do
+                Content.rows[index].columns[1]:SetPoint("LEFT", 0, 0)
+                Content.rows[index].columns[2]:SetPoint("LEFT", 100, 0)
+                Content.rows[index].columns[3]:SetPoint("LEFT", BBBWindow:GetWidth() - 80, 0)
+            end
         end
     end
 )
@@ -78,37 +83,55 @@ BBBWindow.title = BBBWindow:CreateFontString(nil, "OVERLAY", "GameFontHighlight"
 BBBWindow.title:SetPoint("TOP", BBBWindow, 0, -5)
 BBBWindow.title:SetText("BBB (Better Bulletin Board)")
 
--- (Mode) Create a frame for the dropdown menu
+-- Create a frame for the dropdown menu
 local DropdownMenuMode = CreateFrame("Frame", "BBBDropdownMenuMode", BBBWindow, "UIDropDownMenuTemplate")
 DropdownMenuMode:SetPoint("TOPLEFT", BBBWindow, "TOPLEFT", -5, -30)
 DropdownMenuMode:SetSize(100, 30)
 
--- (Mode) Dropdown menu initialization function
+-- Function to update selected options
+local function UpdateSelectedModes(option)
+    local foundIndex = nil
+    for i, value in ipairs(SelectedModes) do
+        if value == option then
+            foundIndex = i
+            break
+        end
+    end
+    if foundIndex then
+        table.remove(SelectedModes, foundIndex)
+    else
+        table.insert(SelectedModes, option)
+    end
+    UIDropDownMenu_SetText(DropdownMenuMode, table.concat(SelectedModes, ", "))
+end
+
+-- Dropdown menu initialization function
 local function InitializeModeDropdownMenu(self, level)
     local info = UIDropDownMenu_CreateInfo()
 
     info.text = "LFG"
     info.value = "Looking For Group"
     info.func = function()
-        UIDropDownMenu_SetText(DropdownMenuMode, "LFG")
+        UpdateSelectedModes("LFG")
     end
     UIDropDownMenu_AddButton(info, level)
 
     info.text = "LFM"
     info.value = "Looking For More"
     info.func = function()
-        UIDropDownMenu_SetText(DropdownMenuMode, "LFM")
+        UpdateSelectedModes("LFM")
     end
     UIDropDownMenu_AddButton(info, level)
 
     info.text = "MISC"
     info.value = "MISC"
     info.func = function()
-        UIDropDownMenu_SetText(DropdownMenuMode, "MISC")
+        UpdateSelectedModes("MISC")
     end
     UIDropDownMenu_AddButton(info, level)
 end
 
+UpdateSelectedModes("LFG")
 UIDropDownMenu_Initialize(DropdownMenuMode, InitializeModeDropdownMenu)
 UIDropDownMenu_SetText(DropdownMenuMode, "LFG")
 
@@ -134,31 +157,9 @@ end
 UIDropDownMenu_Initialize(DropdownMenuDungeon, InitializeDungeonDropdownMenu)
 UIDropDownMenu_SetText(DropdownMenuDungeon, "Blackfathom Deeps")
 
-soundCheckbox = CreateFrame("CheckButton", "BBBSoundCheckbox", BBBWindow, "UICheckButtonTemplate")
-soundCheckbox:SetPoint("TOPLEFT", BBBWindow, "TOPLEFT", 300, -30)
-
-local soundCheckboxTooltip = CreateFrame("GameTooltip", "BBBSoundCheckboxTooltip", nil, "GameTooltipTemplate")
-
--- Set tooltip script for OnEnter and OnLeave events
-soundCheckbox:SetScript(
-    "OnEnter",
-    function()
-        soundCheckboxTooltip:ClearAllPoints()
-        soundCheckboxTooltip:SetOwner(soundCheckbox, "ANCHOR_RIGHT")
-        soundCheckboxTooltip:SetText("On message play sound")
-        soundCheckboxTooltip:Show()
-    end
-)
-soundCheckbox:SetScript(
-    "OnLeave",
-    function()
-        soundCheckboxTooltip:Hide()
-    end
-)
-
 EditBox = CreateFrame("EditBox", "MyEditBox", BBBWindow, "InputBoxTemplate")
 EditBox:SetSize(150, -30)
-EditBox:SetPoint("TOP", 150, -60)
+EditBox:SetPoint("TOP", 120, -60)
 EditBox:SetAutoFocus(false)
 EditBox:SetFontObject(GameFontNormal)
 EditBox:SetText("Type here...")
@@ -186,8 +187,28 @@ EditBox:SetScript(
     end
 )
 
+-- Create "clear table" button
+local ClearButton = CreateFrame("Button", "ClearButton", BBBWindow, "UIPanelButtonTemplate")
+ClearButton:SetSize(16, 16) -- Adjust the size of the button as needed
+ClearButton:SetPoint("TOP", 220, -38)
+
+-- Set the texture/icon for the button
+ClearButton:SetNormalTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Up")
+
+ClearButton:SetScript(
+    "OnEnter",
+    function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText("Clear table")
+        GameTooltip:Show()
+    end
+)
+ClearButton:SetScript(
+    "OnLeave",
+    function(self)
+        GameTooltip:Hide()
+    end
+)
+
 -- Show window
 BBBWindow:Show()
-
--- Hide sound tooltip / visible on startup for some reason
-soundCheckboxTooltip:Hide()

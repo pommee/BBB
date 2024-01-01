@@ -1,12 +1,3 @@
-local BBBWindow = _G["BBBWindow"]
-local DUNGEON_NAMES = _G["DUNGEON_NAMES"]
-local SoundCheckbox = _G["soundCheckbox"]
-local editBox = _G["EditBox"]
-local messagesFrame = CreateFrame("Frame")
-local CELL_WIDTH = 250
-local CELL_HEIGHT = 20
-local NUM_CELLS = 3
-local GroupTable = {}
 local CLASS_COLORS = {
     Druid = {r = 1.00, g = 0.49, b = 0.04},
     Hunter = {r = 0.67, g = 0.83, b = 0.45},
@@ -19,31 +10,49 @@ local CLASS_COLORS = {
     Warrior = {r = 0.78, g = 0.61, b = 0.43}
 }
 
+local BBBWindow = _G["BBBWindow"]
+local DUNGEON_NAMES = _G["DUNGEON_NAMES"]
+local editBox = _G["EditBox"]
+local clearButton = _G["ClearButton"]
+local messagesFrame = CreateFrame("Frame")
+
+GroupTable = {}
 Content = {}
+ScrollFrame = nil
+
+NUM_CELLS = 3
+CELL_WIDTH = 250
+CELL_HEIGHT = 20
 
 function OnChatMessage(self, event, message, playerName, _, _, _, _, _, _, _, _, _, guid, _, _, _, _, _)
+    playerName = string.match(playerName, "([^%-]+)")
     local playerClass, _, playerRace = GetPlayerInfoByGUID(guid)
     local mode = UIDropDownMenu_GetText(_G["BBBDropdownMenuMode"])
     local dungeon = GetAbbreviationByFullName(UIDropDownMenu_GetText(_G["BBBDropdownMenuDungeon"]))
+    local selectedModes = _G["SelectedModes"]
 
-    playerName = string.match(playerName, "([^%-]+)")
-    if mode == "LFG" or mode == "LFM" then
-        if string.find(message:upper(), mode) then
+    local isLFG = has_value(selectedModes, "LFG")
+    local isLFM = has_value(selectedModes, "LFM")
+    local isMISC = has_value(selectedModes, "MISC")
+
+    if isLFG or isLFM then
+        local selectedMode = has_any_value(message:upper(), selectedModes)
+
+        if selectedMode then
             if ContainsAbbreviation(message:upper(), dungeon) then
-                HandleLookingFor(message, playerName, mode, playerClass, playerRace)
+                HandleInsertMessage(message, playerName, selectedMode.value, playerClass, playerRace)
             end
         end
-    elseif mode == "MISC" then
+    elseif isMISC then
         local searchTerm = editBox:GetText()
 
-        -- @TODO: Implement so that MISC works
         if message.find(message:lower(), searchTerm) then
-            print(message)
+            HandleInsertMessage(message, playerName, mode.value, playerClass, playerRace)
         end
     end
 end
 
-function HandleLookingFor(message, playerName, mode, playerClass, playerRace)
+function HandleInsertMessage(message, playerName, mode, playerClass, playerRace)
     local timestamp = "00:00"
     local tableEntry = {
         timestamp = timestamp,
@@ -113,10 +122,6 @@ function UpdateList(message, playerName, mode, timestamp, playerClass, playerRac
     SetClassTextColor(playerClass, Content.rows[index].columns[1])
     Content.rows[index].columns[2]:SetText(shortenedMessage)
     Content.rows[index].columns[3]:SetText(timestamp)
-
-    if SoundCheckbox:GetChecked() then
-        PlaySoundFile("Interface\\AddOns\\BBB\\Simon.ogg")
-    end
 
     Content.rows[index]:SetScript(
         "OnEnter",
@@ -219,21 +224,21 @@ function SetClassTextColor(className, fontString)
 end
 
 ------ INITIALIZING ------
-if BBBWindow then
-    -- Add a scrollframe (includes basic scrollbar thumb/buttons and functionality)
-    local ScrollFrame = CreateFrame("ScrollFrame", "BBBScrollFrame", BBBWindow, "UIPanelScrollFrameTemplate")
-    ScrollFrame:SetSize(CELL_WIDTH * NUM_CELLS + 40, 300)
-    ScrollFrame:SetPoint("TOPLEFT", BBBWindow, "TOPLEFT", 10, -60)
-    ScrollFrame:SetPoint("BOTTOMRIGHT", BBBWindow, "BOTTOMRIGHT", -30, 10)
+local function initScrollableTable(args)
+    if BBBWindow then
+        ScrollFrame = CreateFrame("ScrollFrame", "BBBScrollFrame", BBBWindow, "UIPanelScrollFrameTemplate")
+        ScrollFrame:SetSize(CELL_WIDTH * NUM_CELLS + 40, 300)
+        ScrollFrame:SetPoint("TOPLEFT", BBBWindow, "TOPLEFT", 10, -60)
+        ScrollFrame:SetPoint("BOTTOMRIGHT", BBBWindow, "BOTTOMRIGHT", -30, 10)
 
-    -- Create a scrollChild to contain the content
-    ScrollFrame.scrollChild = CreateFrame("Frame", nil, ScrollFrame)
-    ScrollFrame.scrollChild:SetSize(100, 100)
-    ScrollFrame.scrollChild:SetPoint("TOPLEFT", 5, -5)
-    ScrollFrame:SetScrollChild(ScrollFrame.scrollChild)
+        ScrollFrame.scrollChild = CreateFrame("Frame", nil, ScrollFrame)
+        ScrollFrame.scrollChild:SetSize(100, 100)
+        ScrollFrame.scrollChild:SetPoint("TOPLEFT", 5, -5)
+        ScrollFrame:SetScrollChild(ScrollFrame.scrollChild)
 
-    Content = ScrollFrame.scrollChild
-    Content.rows = {}
+        Content = ScrollFrame.scrollChild
+        Content.rows = {}
+    end
 end
 
 messagesFrame:RegisterEvent("CHAT_MSG_CHANNEL")
@@ -252,3 +257,47 @@ timerFrame:SetScript(
         end
     end
 )
+
+initScrollableTable()
+
+local function RemoveAllEntries()
+    if ScrollFrame then
+        local scrollChild = ScrollFrame:GetScrollChild()
+        if scrollChild then
+            for _, row in ipairs(Content.rows) do
+                row:Hide()
+                row:SetParent(nil)
+            end
+
+            wipe(GroupTable)
+            wipe(Content.rows)
+        end
+    end
+end
+
+clearButton:SetScript(
+    "OnClick",
+    function(self)
+        RemoveAllEntries()
+    end
+)
+
+function has_value(tab, val)
+    for _, value in ipairs(tab) do
+        if value == val then
+            return val, true
+        end
+    end
+
+    return false
+end
+
+function has_any_value(message, values)
+    for _, value in ipairs(values) do
+        if message.find(message, value) then
+            return value, true
+        end
+    end
+
+    return false
+end
