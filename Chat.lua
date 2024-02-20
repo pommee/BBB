@@ -46,7 +46,20 @@ function OnChatMessage(self, event, message, playerName, _, _, _, _, _, _, _, _,
     elseif isMISC then
         local searchTerm = editBox:GetText()
 
-        if message.find(message:lower(), searchTerm) then
+        local searchWords = {}
+        for word in searchTerm:gmatch("%S+") do
+            table.insert(searchWords, word)
+        end
+
+        local matchFound = false
+        for _, word in ipairs(searchWords) do
+            if message:lower():find(word:lower()) then
+                matchFound = true
+                break
+            end
+        end
+
+        if matchFound then
             HandleInsertMessage(message, playerName, mode.value, playerClass, playerRace)
         end
     end
@@ -65,6 +78,7 @@ function HandleInsertMessage(message, playerName, mode, playerClass, playerRace)
 end
 
 function UpdateTimestamps()
+    local indexToRemove = nil
     for i = 1, #GroupTable do
         if GroupTable[i].timestamp == "00:00" then
             GroupTable[i].timestamp = 0
@@ -76,6 +90,24 @@ function UpdateTimestamps()
         local seconds = currentTime % 60
         local formattedTime = string.format("%02d:%02d", minutes, seconds)
         Content.rows[i].columns[3]:SetText(formattedTime)
+
+        if currentTime > 120 then -- If the timestamp exceeds 02:00
+            indexToRemove = i
+        end
+    end
+
+    if indexToRemove then
+        -- Remove the entry at indexToRemove and bump up other entries
+        table.remove(GroupTable, indexToRemove)
+        for i = indexToRemove, #Content.rows do
+            if Content.rows[i + 1] then
+                Content.rows[i].columns[1]:SetText(Content.rows[i + 1].columns[1]:GetText())
+                Content.rows[i].columns[2]:SetText(Content.rows[i + 1].columns[2]:GetText())
+                Content.rows[i].columns[3]:SetText(Content.rows[i + 1].columns[3]:GetText())
+            else
+                Content.rows[i]:Hide()
+            end
+        end
     end
 end
 
@@ -113,15 +145,16 @@ function UpdateList(message, playerName, mode, timestamp, playerClass, playerRac
 
     local shortenedMessage = message
     -- If a message is long then shorten it
-    if #message > 60 then
-        shortenedMessage = message:sub(1, 57) .. "..."
+    if #message > 58 then
+        shortenedMessage = message:sub(1, 55) .. "..."
     end
 
     -- now actually update the contents of the row
     Content.rows[index].columns[1]:SetText(playerName)
-    SetClassTextColor(playerClass, Content.rows[index].columns[1])
     Content.rows[index].columns[2]:SetText(shortenedMessage)
     Content.rows[index].columns[3]:SetText(timestamp)
+
+    SetClassTextColor(playerClass, Content.rows[index].columns[1])
 
     Content.rows[index]:SetScript(
         "OnEnter",
@@ -152,7 +185,6 @@ function ShowRightClickMenu(index)
     local menu = CreateFrame("Frame", "BBBRightClickMenu", UIParent, "UIDropDownMenuTemplate")
     local playername = Content.rows[index].columns[1]:GetText()
 
-    -- Define menu options
     local menuList = {
         {
             text = "Who",

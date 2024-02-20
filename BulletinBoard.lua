@@ -7,7 +7,12 @@ DUNGEON_NAMES = {
     ["Stocks"] = "Stockade",
     ["Gnomer"] = "Gnomeregan",
     ["RFK"] = "Razorfen Kraul",
-    ["RFD"] = "Razorfen Downs"
+    ["RFD"] = "Razorfen Downs",
+    ["SM"] = "Scarlet Monastery",
+    ["SM GY"] = "Scarlet Monastery Graveyard",
+    ["SM LIB"] = "Scarlet Monastery Library",
+    ["SM ARMORY"] = "Scarlet Monastery Armory",
+    ["SM CATH"] = "Scarlet Monastery Cathedral"
 }
 
 SelectedModes = {}
@@ -15,7 +20,7 @@ SelectedModes = {}
 -- Window --
 BBBWindow = CreateFrame("Frame", "BBBWindow", UIParent, "BasicFrameTemplateWithInset")
 BBBWindow:SetPoint("CENTER")
-BBBWindow:SetSize(540, 300)
+BBBWindow:SetSize(300, 540)
 BBBWindow:SetResizeBounds(540, 300, 600, 500)
 BBBWindow:SetMovable(true)
 BBBWindow:SetClampedToScreen(true)
@@ -137,29 +142,51 @@ UIDropDownMenu_SetText(DropdownMenuMode, "LFG")
 
 -- (Dungeon) Create a frame for the dropdown menu
 local DropdownMenuDungeon = CreateFrame("Frame", "BBBDropdownMenuDungeon", BBBWindow, "UIDropDownMenuTemplate")
-DropdownMenuDungeon:SetPoint("TOPLEFT", BBBWindow, "TOPLEFT", 140, -30)
-DropdownMenuDungeon:SetSize(150, 30)
+DropdownMenuDungeon:SetSize(160, 30)
+DropdownMenuDungeon:SetPoint("TOPLEFT", BBBWindow, "TOPLEFT", 130, -30)
 
 -- (Dungeon) Dropdown menu initialization function
 local function InitializeDungeonDropdownMenu(self, level)
     local info = UIDropDownMenu_CreateInfo()
 
-    for abbreviation, fullName in pairs(DUNGEON_NAMES) do
-        info.text = fullName
-        info.value = abbreviation
-        info.func = function()
-            UIDropDownMenu_SetText(DropdownMenuDungeon, fullName)
+    -- Define the order of abbreviations
+    local abbreviationOrder = {
+        "RFC",
+        "WC",
+        "DM",
+        "SFK",
+        "BFD",
+        "Stocks",
+        "Gnomer",
+        "RFK",
+        "RFD",
+        "SM",
+        "SM GY",
+        "SM LIB",
+        "SM ARMORY",
+        "SM CATH"
+    }
+
+    for _, abbreviation in ipairs(abbreviationOrder) do
+        local fullName = DUNGEON_NAMES[abbreviation]
+        if fullName then
+            info.text = fullName
+            info.value = abbreviation
+            info.func = function()
+                UIDropDownMenu_SetText(DropdownMenuDungeon, fullName)
+            end
+            UIDropDownMenu_AddButton(info, level)
         end
-        UIDropDownMenu_AddButton(info, level)
     end
 end
 
 UIDropDownMenu_Initialize(DropdownMenuDungeon, InitializeDungeonDropdownMenu)
+UIDropDownMenu_SetWidth(DropdownMenuDungeon, 160)
 UIDropDownMenu_SetText(DropdownMenuDungeon, "Blackfathom Deeps")
 
 EditBox = CreateFrame("EditBox", "MyEditBox", BBBWindow, "InputBoxTemplate")
 EditBox:SetSize(150, -30)
-EditBox:SetPoint("TOP", 120, -60)
+EditBox:SetPoint("TOP", 150, -58)
 EditBox:SetAutoFocus(false)
 EditBox:SetFontObject(GameFontNormal)
 EditBox:SetText("Type here...")
@@ -190,7 +217,7 @@ EditBox:SetScript(
 -- Create "clear table" button
 local ClearButton = CreateFrame("Button", "ClearButton", BBBWindow, "UIPanelButtonTemplate")
 ClearButton:SetSize(16, 16) -- Adjust the size of the button as needed
-ClearButton:SetPoint("TOP", 220, -38)
+ClearButton:SetPoint("TOP", 250, -35)
 
 -- Set the texture/icon for the button
 ClearButton:SetNormalTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Up")
